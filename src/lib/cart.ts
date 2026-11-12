@@ -111,6 +111,34 @@ export interface Order {
   createdAt: string;
 }
 
+type Result<T> = { ok: true; value: T } | { ok: false; status: number; error: string };
+
+/** Validate, price from the menu and check the slot. Used by the API and by the static (GitHub Pages) demo store. */
+export function placeOrder(
+  raw: unknown,
+  ctx: { menu: MenuCategory[]; hours: WeekHours; timeZone: string; now: Date; id: string; number: number },
+): Result<Order> {
+  const parsed = orderSchema.safeParse(raw);
+  if (!parsed.success) return { ok: false, status: 400, error: parsed.error.issues[0]?.message ?? "Check your order." };
+  const input = parsed.data;
+  const { lines, total } = priceCart(ctx.menu, input.items);
+  if (!lines.length) return { ok: false, status: 400, error: "Those items aren't on the menu any more." };
+  if (!slotIsOpen(ctx.hours, ctx.timeZone, ctx.now, input.pickup)) return { ok: false, status: 409, error: "That pickup time has passed. Choose another." };
+  return {
+    ok: true,
+    value: { id: ctx.id, number: ctx.number, lines, total, pickup: input.pickup, name: input.name, phone: input.phone, note: input.note, status: "new", createdAt: ctx.now.toISOString() },
+  };
+}
+
+/** Move an order exactly one step; refuses skips and repeats (two tablets tapping at once). */
+export function advanceOrder(orders: Order[], id: string, status: string): Result<Order> {
+  const order = orders.find((o) => o.id === id);
+  if (!order) return { ok: false, status: 404, error: "Order not found." };
+  if (nextStatus(order.status) !== status) return { ok: false, status: 409, error: "Order already moved." };
+  order.status = status as Status;
+  return { ok: true, value: order };
+}
+
 /** True when the chosen slot is still offered (with a few minutes' grace for slow submits). */
 export function slotIsOpen(hours: WeekHours, timeZone: string, now: Date, pickup: { date: string; time: string }, graceMin = 10) {
   const day = pickupDay(hours, timeZone, new Date(now.getTime() - graceMin * 60_000));

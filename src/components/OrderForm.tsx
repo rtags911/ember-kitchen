@@ -5,6 +5,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { site } from "@/content/site";
 import { formatPrice, orderSchema, pickupDay, priceCart, type Order, type PickupDay } from "@/lib/cart";
 import { clearCart, setQty, useCart } from "./cart-store";
+import { createOrder } from "./orders-api";
 import { Stepper } from "./Stepper";
 import { DAYS } from "./Today";
 
@@ -53,14 +54,13 @@ export function OrderForm() {
     setErrors({});
     setSending(true);
     try {
-      const res = await fetch("/api/orders", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(check.data) });
-      const body = await res.json();
-      if (!res.ok) {
-        setErrors({ form: body.error ?? "We couldn't place that order. Try again." });
-        if (res.status === 409) setDay(pickupDay(site.hours, site.timeZone, new Date()));
+      const r = await createOrder(check.data);
+      if (!r.ok) {
+        setErrors({ form: r.error });
+        if (r.status === 409) setDay(pickupDay(site.hours, site.timeZone, new Date()));
         return;
       }
-      setPlaced(body as Order);
+      setPlaced(r.order);
       clearCart();
       window.scrollTo({ top: 0 });
     } catch {

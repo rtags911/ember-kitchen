@@ -1,6 +1,6 @@
 // Self-check: node --experimental-strip-types src/lib/cart.check.ts
 import assert from "node:assert/strict";
-import { cafeClock, formatPrice, nextStatus, orderSchema, pickupDay, priceCart, slotIsOpen } from "./cart.ts";
+import { advanceOrder, cafeClock, formatPrice, nextStatus, orderSchema, pickupDay, placeOrder, priceCart, slotIsOpen } from "./cart.ts";
 import type { MenuCategory, WeekHours } from "./types.ts";
 
 const tz = "UTC";
@@ -67,5 +67,20 @@ assert.ok(!orderSchema.safeParse({ ...good, pickup: { date: "2026-11-12", time: 
 assert.equal(nextStatus("new"), "preparing");
 assert.equal(nextStatus("preparing"), "ready");
 assert.equal(nextStatus("ready"), null);
+
+// placeOrder / advanceOrder (shared by API and static store).
+const ctx = { menu, hours, timeZone: tz, now, id: "x1", number: 101 };
+const placed = placeOrder({ ...good, items: { a: 2, ghost: 1 } }, ctx);
+assert.ok(placed.ok && placed.value.total === 850 && placed.value.status === "new" && placed.value.lines.length === 1);
+assert.deepEqual(placeOrder({ ...good, items: { ghost: 1 } }, ctx), { ok: false, status: 400, error: "Those items aren't on the menu any more." });
+const late = placeOrder({ ...good, pickup: { date: "2026-11-12", time: "08:10" } }, ctx);
+assert.ok(!late.ok && late.status === 409);
+assert.ok(!placeOrder(null, ctx).ok);
+const list = placed.ok ? [placed.value] : [];
+assert.ok(!advanceOrder(list, "x1", "ready").ok, "can't skip preparing");
+assert.ok(advanceOrder(list, "x1", "preparing").ok);
+assert.ok(!advanceOrder(list, "x1", "preparing").ok, "can't repeat");
+assert.ok(advanceOrder(list, "x1", "ready").ok);
+assert.equal(advanceOrder(list, "nope", "ready").ok, false);
 
 console.log("cart self-check passed");

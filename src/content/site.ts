@@ -1,7 +1,7 @@
 // FICTIONAL CLIENT. Menu, prices, hours and contact details are sample values for the client to confirm (see README).
 import type { Photo, SiteContent } from "@/lib/types";
 
-const P = (src: string, alt: string, width: number, height: number): Photo => ({ src: `/images/${src}`, alt, width, height });
+const P = (src: string, alt: string, width: number, height: number): Photo => ({ src: `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/images/${src}`, alt, width, height });
 
 export const site: SiteContent = {
   name: "Ember Kitchen",
@@ -9,7 +9,7 @@ export const site: SiteContent = {
   headline: "Order ahead, pick up hot.",
   description:
     "A neighbourhood wood-fired café. Breakfast, sandwiches, bakery and coffee. Order online and pick up at the counter, pay when you collect.",
-  url: "https://ember-kitchen.example",
+  url: "https://rtags911.github.io/ember-kitchen",
   timeZone: "America/Los_Angeles",
   address: { street: "418 Alder Street", city: "Portland, OR 97205", mapUrl: "https://www.openstreetmap.org/search?query=418%20Alder%20Street%20Portland" },
   phone: "(503) 555-0148",

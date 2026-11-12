@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { STATUSES, formatPrice, nextStatus, type Order, type Status } from "@/lib/cart";
+import { listOrders, moveOrder } from "./orders-api";
 
 const TITLES: Record<Status, string> = { new: "New", preparing: "Preparing", ready: "Ready" };
 const ACTION: Record<Status, string> = { new: "Start preparing", preparing: "Mark ready", ready: "" };
@@ -13,9 +14,7 @@ export function Board() {
 
   const load = useCallback(async () => {
     try {
-      const res = await fetch("/api/orders", { cache: "no-store" });
-      if (!res.ok) throw new Error();
-      setOrders(await res.json());
+      setOrders(await listOrders());
       setError("");
     } catch {
       setError("Can't reach the order list. Retrying…");
@@ -32,8 +31,7 @@ export function Board() {
     const status = nextStatus(o.status);
     if (!status) return;
     setOrders((list) => list?.map((x) => (x.id === o.id ? { ...x, status } : x)) ?? null); // optimistic
-    const res = await fetch("/api/orders", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: o.id, status }) }).catch(() => null);
-    if (!res?.ok) setError("That change didn't save. Refreshed the board.");
+    if (!(await moveOrder(o.id, status).catch(() => false))) setError("That change didn't save. Refreshed the board.");
     load();
   }
 

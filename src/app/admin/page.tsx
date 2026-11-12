@@ -17,6 +17,11 @@ export default function AdminPage() {
           Back to site
         </Link>
       </div>
+      {process.env.NEXT_PUBLIC_STATIC === "1" && (
+        <p className="mb-6 max-w-[70ch] text-small text-soft">
+          Static demo: with no server, this board shows the orders placed in this browser. Place one on the order page, then move it along here.
+        </p>
+      )}
       <Board />
     </main>
   );

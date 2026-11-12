@@ -37,3 +37,15 @@ Everything below is made up and must be replaced or confirmed:
 - **Photos:** open-licence stock, not the café's own (the counter photo shows another café). Replace with the client's photos.
 
 The site is `noindex` because the café is fictional; remove `robots` in `src/app/layout.tsx` for a real launch.
+
+## GitHub Pages (static demo)
+Live: https://rtags911.github.io/ember-kitchen/ · deployed by `.github/workflows/pages.yml` on every push to `main`.
+
+```bash
+NEXT_PUBLIC_STATIC=1 NEXT_PUBLIC_BASE_PATH=/ember-kitchen npx next build   # → out/
+```
+
+Pages has no server, so the static build drops `/api/orders` and keeps orders in the visitor's browser (`src/components/orders-api.ts`), validated by the same `placeOrder` / `advanceOrder` in `src/lib/cart.ts`. The /admin board then shows orders placed in that browser. Run `npx next start -p 3280` for the real API version.
+On Git Bash for Windows, prefix the build with `MSYS_NO_PATHCONV=1` so `/ember-kitchen` isn't rewritten to a Windows path.
+
+Portfolio screenshot: `design-process/screenshot-1200x750.png`.
