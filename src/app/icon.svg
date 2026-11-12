@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Ember flame mark on char. -->
+  <rect width="64" height="64" rx="14" fill="#1e1a17"/>
+  <path fill="#e8a070" d="M32 10c3 11 16 17 16 31a16 16 0 0 1-32 0c0-7 3.7-11.8 7-15 1 5.6 3.7 8.2 6.4 8.2C29.4 25 27.7 18 32 10Z"/>
+</svg>

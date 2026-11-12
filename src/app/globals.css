@@ -1,0 +1,247 @@
+@import "tailwindcss";
+
+/* Tokens in three layers. Re-skin by changing layer 1 only. Palette "Hearth": design-process/palette.md */
+:root {
+  /* 1. Primitives */
+  --p-flour: #f5eee3;
+  --p-crust: #eadfcf;
+  --p-char: #1e1a17;
+  --p-coal: #2a2420;
+  --p-ember: #a8340a;
+  --p-ember-deep: #8a2a07;
+  --p-glow: #e8a070;
+  --p-ash: #6a5d50;
+  --p-paper: #fffaf2;
+
+  /* 2. Semantic (contrast against usual ground) */
+  --ground: var(--p-flour); /* page */
+  --surface: var(--p-crust); /* bands, steppers */
+  --paper: var(--p-paper); /* the menu sheet and tickets */
+  --ink: var(--p-char); /* text, 15.0:1 on ground */
+  --soft: var(--p-ash); /* secondary text, 5.5:1 ground / 4.8:1 surface */
+  --ember: var(--p-ember); /* accent + primary action, 5.8:1 ground / 5.1:1 surface */
+  --coal: var(--p-coal); /* dark bands, footer */
+  --glow: var(--p-glow); /* accent on coal only, 7.1:1 */
+  --hair: color-mix(in srgb, var(--p-char) 18%, transparent);
+
+  /* 3. Component */
+  --btn-bg: var(--ember);
+  --btn-bg-hover: var(--p-ember-deep);
+  --btn-fg: var(--p-flour);
+  --btn-h: 48px;
+
+  /* Five sizes */
+  --step-small: clamp(0.875rem, 0.85rem + 0.1vw, 0.9375rem);
+  --step-body: clamp(1rem, 0.96rem + 0.2vw, 1.125rem);
+  --step-lead: clamp(1.25rem, 1.05rem + 0.8vw, 1.75rem);
+  --step-head: clamp(2.25rem, 1.4rem + 3.2vw, 4.25rem);
+  --step-display: clamp(3rem, 1rem + 7vw, 8rem);
+
+  --margin: clamp(16px, 5vw, 80px);
+  --section: clamp(80px, 9vw, 152px);
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --dur-press: 120ms;
+  --dur-ui: 200ms;
+}
+
+@theme inline {
+  --color-ground: var(--ground);
+  --color-surface: var(--surface);
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-soft: var(--soft);
+  --color-ember: var(--ember);
+  --color-coal: var(--coal);
+  --color-glow: var(--glow);
+  --color-hair: var(--hair);
+  --font-sans: var(--font-hanken), system-ui, sans-serif;
+  --text-small: var(--step-small);
+  --text-body: var(--step-body);
+  --text-lead: var(--step-lead);
+  --text-head: var(--step-head);
+  --text-display: var(--step-display);
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 72px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--step-body);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+h1,
+h2,
+h3 {
+  font-weight: 600;
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+::selection {
+  background: var(--ember);
+  color: var(--p-flour);
+}
+
+:focus-visible {
+  outline: 2px solid var(--ember);
+  outline-offset: 3px;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@layer components {
+  /* Primary button: ember block, presses down on tap. */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6em;
+    min-height: var(--btn-h);
+    padding: 0 24px;
+    border-radius: 999px;
+    background: var(--btn-bg);
+    color: var(--btn-fg);
+    font-size: var(--step-small);
+    font-weight: 600;
+    transition:
+      background-color var(--dur-ui) ease,
+      transform var(--dur-press) var(--ease-out);
+  }
+  .btn:active {
+    transform: scale(0.97);
+  }
+  .btn[aria-disabled="true"] {
+    background: var(--surface);
+    color: var(--soft);
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink);
+    box-shadow: inset 0 0 0 1.5px var(--ink);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .btn:hover {
+      background: var(--btn-bg-hover);
+    }
+    .btn-ghost:hover {
+      background: var(--surface);
+    }
+  }
+
+  /* Round icon-sized control for qty steppers; 44px target. */
+  .tap {
+    display: inline-grid;
+    place-items: center;
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: 999px;
+    transition:
+      background-color var(--dur-ui) ease,
+      transform var(--dur-press) var(--ease-out);
+  }
+  .tap:active {
+    transform: scale(0.92);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .tap:hover {
+      background: var(--surface);
+    }
+  }
+
+  .link {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.22em;
+  }
+
+  /* Dotted leader between a menu item and its price, like a printed menu. */
+  .leader {
+    flex: 1;
+    min-width: 1.5rem;
+    border-bottom: 2px dotted var(--hair);
+    transform: translateY(-0.35em);
+  }
+
+  .field {
+    width: 100%;
+    min-height: 48px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: var(--paper);
+    box-shadow: inset 0 0 0 1px var(--hair);
+    font-size: 16px; /* no zoom on iOS */
+  }
+  .field:focus-visible {
+    outline: 2px solid var(--ember);
+    outline-offset: 0;
+  }
+  .field[aria-invalid="true"] {
+    box-shadow: inset 0 0 0 1.5px var(--ember);
+  }
+
+  /* Order ticket edge: a torn, zig-zag bottom. */
+  .ticket {
+    background: var(--paper);
+    --zig: 10px;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--zig)), 95% 100%, 90% calc(100% - var(--zig)), 85% 100%, 80% calc(100% - var(--zig)), 75% 100%, 70% calc(100% - var(--zig)), 65% 100%, 60% calc(100% - var(--zig)), 55% 100%, 50% calc(100% - var(--zig)), 45% 100%, 40% calc(100% - var(--zig)), 35% 100%, 30% calc(100% - var(--zig)), 25% 100%, 20% calc(100% - var(--zig)), 15% 100%, 10% calc(100% - var(--zig)), 5% 100%, 0 calc(100% - var(--zig)));
+    padding-bottom: calc(var(--zig) + 20px);
+  }
+}
+
+/* Count badge on the bag: pops once when it changes (key remount). */
+.bump {
+  animation: bump 260ms var(--ease-out);
+}
+@keyframes bump {
+  from {
+    transform: scale(1.35);
+  }
+}
+
+/* Signature: the oven door drops open once on load and the fire shows. Transform only. */
+.door {
+  animation: door-open 1100ms var(--ease-in-out) 350ms both;
+}
+@keyframes door-open {
+  to {
+    transform: scaleY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .door {
+    display: none;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+  .bump {
+    animation: none;
+  }
+  .btn,
+  .tap {
+    transition: none;
+  }
+  .btn:active,
+  .tap:active {
+    transform: none;
+  }
+}
